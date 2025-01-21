@@ -1,0 +1,16 @@
+services:
+  sider-admin-backend:
+    image: registry.gitlab.com/ours.io/wisebase-admin-backend:latest
+    restart: always
+    container_name: wisebase-admin-backend
+    ports:
+      - 8084:8084
+    volumes:
+      - /data/wisebase-admin-backend/log:/log
+    environment:
+      APP_MODE: prod
+
+networks:
+  default:
+    external:
+      name: ours_network
