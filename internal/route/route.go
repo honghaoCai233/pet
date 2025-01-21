@@ -16,7 +16,7 @@ import (
 	"pet/configs"
 	"pet/internal/route/common"
 	"pet/internal/route/middleware"
-	v1 "pet/internal/route/v1"
+	"pet/internal/service"
 )
 
 func NewGinEngine(conf *configs.Config) *gin.Engine {
@@ -36,27 +36,27 @@ func NewGinEngine(conf *configs.Config) *gin.Engine {
 }
 
 type HttpEngine struct {
-	log     *zap.SugaredLogger
-	conf    *configs.Config
-	handler *gin.Engine
+	log         *zap.SugaredLogger
+	conf        *configs.Config
+	handler     *gin.Engine
+	userService *service.UserService
+}
 
-	routers []v1.Router
+type Registrable interface {
+	RegisterRoute(*gin.RouterGroup)
 }
 
 func NewHttpEngine(opt *WireOption) *HttpEngine {
 	return &HttpEngine{
-		log:     opt.Log,
-		conf:    opt.Conf,
-		handler: opt.Handler,
-		routers: opt.Routers,
+		log:         opt.Log,
+		conf:        opt.Conf,
+		handler:     opt.Handler,
+		userService: opt.UserService,
 	}
 }
 
 func (h *HttpEngine) registerRoute() {
-	r := h.handler.Group("/api/v1")
-	for _, router := range h.routers {
-		router.RegisteRoute(r)
-	}
+	//r := h.handler.Group("/api/v1")
 }
 
 func (h *HttpEngine) Run() error {

@@ -1,17 +1,16 @@
-package data
+package user
 
 import (
-	"pet/configs"
+	"pet/internal/service"
 
 	"github.com/google/wire"
 )
 
 type Option struct {
-	Configs *configs.Config
+	UserSrv *service.UserService
 }
 
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(Option), "*"),
-	NewData,
 	NewUser,
 )

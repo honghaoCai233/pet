@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"go.uber.org/zap"
-
 	"pet/configs"
-	v1 "pet/internal/route/v1"
+	v1user "pet/internal/route/v1/user"
+	"pet/internal/service"
 )
 
 type WireOption struct {
@@ -14,12 +14,12 @@ type WireOption struct {
 	Conf    *configs.Config
 	Handler *gin.Engine
 
-	Routers []v1.Router
+	UserService *service.UserService
 }
 
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(WireOption), "*"),
-	v1.ProviderSet,
+	v1user.ProviderSet,
 	NewGinEngine,
 	NewHttpEngine,
 )
