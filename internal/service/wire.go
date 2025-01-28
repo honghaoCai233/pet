@@ -8,11 +8,12 @@ import (
 )
 
 type Option struct {
-	Config        *configs.Config
-	UserRepo      *data.UserRepo
-	PetRepo       *data.PetRepo
-	TaskRepo      *data.TaskRepo
-	CommunityRepo *data.CommunityRepo
+	Config                *configs.Config
+	UserRepo              *data.UserRepo
+	PetRepo               *data.PetRepo
+	TaskRepo              *data.TaskRepo
+	CommunityRepo         *data.CommunityRepo
+	SitterApplicationRepo *data.SitterApplicationRepo
 }
 
 var ProviderSet = wire.NewSet(
@@ -21,4 +22,5 @@ var ProviderSet = wire.NewSet(
 	NewPetService,
 	NewTaskService,
 	NewCommunityService,
+	NewSitterApplicationService,
 )

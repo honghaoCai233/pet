@@ -17,4 +17,5 @@ var ProviderSet = wire.NewSet(
 	NewPetRepo,
 	NewTaskRepo,
 	NewCommunityRepo,
+	NewSitterApplicationRepo,
 )

@@ -7,10 +7,11 @@ import (
 )
 
 type Option struct {
-	UserSrv      *service.UserService
-	PetSrv       *service.PetService
-	TaskSrv      *service.TaskService
-	CommunitySrv *service.CommunityService
+	UserSrv              *service.UserService
+	PetSrv               *service.PetService
+	TaskSrv              *service.TaskService
+	CommunitySrv         *service.CommunityService
+	SitterApplicationSrv *service.SitterApplicationService
 }
 
 // ProviderSet is router providers.
@@ -20,4 +21,5 @@ var ProviderSet = wire.NewSet(
 	NewPetHandler,
 	NewTaskHandler,
 	NewCommunityHandler,
+	NewSitterApplicationHandler,
 )
