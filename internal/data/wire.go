@@ -13,5 +13,8 @@ type Option struct {
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(Option), "*"),
 	NewData,
-	NewUser,
+	NewUserRepo,
+	NewPetRepo,
+	NewTaskRepo,
+	NewCommunityRepo,
 )
