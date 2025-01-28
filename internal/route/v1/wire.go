@@ -12,6 +12,7 @@ type Option struct {
 	TaskSrv              *service.TaskService
 	CommunitySrv         *service.CommunityService
 	SitterApplicationSrv *service.SitterApplicationService
+	AddressSrv           *service.AddressService
 }
 
 // ProviderSet is router providers.

@@ -14,6 +14,7 @@ type Option struct {
 	TaskRepo              *data.TaskRepo
 	CommunityRepo         *data.CommunityRepo
 	SitterApplicationRepo *data.SitterApplicationRepo
+	AddressRepo           *data.AddressRepo
 }
 
 var ProviderSet = wire.NewSet(
@@ -23,4 +24,5 @@ var ProviderSet = wire.NewSet(
 	NewTaskService,
 	NewCommunityService,
 	NewSitterApplicationService,
+	NewAddressService,
 )
