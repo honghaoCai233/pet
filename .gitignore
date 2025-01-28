@@ -25,5 +25,6 @@ output/
 **/data/admin/ent/
 **/data/prod/ent/
 **/data/slave/ent/
+**/data/ent/
 /configs/local.config.yaml
 /cmd/app/wire_gen.go
