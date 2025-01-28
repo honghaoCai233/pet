@@ -20,7 +20,7 @@ func NewTaskHandler(opt *Option) *TaskHandler {
 	}
 }
 
-func (h *TaskHandler) RegisterRoutes(r *gin.RouterGroup) {
+func (h *TaskHandler) RegisterRoute(r *gin.RouterGroup) {
 	tasks := r.Group("/tasks")
 	{
 		tasks.POST("", h.createTask)                        // 创建任务

@@ -20,7 +20,7 @@ func NewCommunityHandler(opt *Option) *CommunityHandler {
 	}
 }
 
-func (h *CommunityHandler) RegisterRoutes(r *gin.RouterGroup) {
+func (h *CommunityHandler) RegisterRoute(r *gin.RouterGroup) {
 	communities := r.Group("/communities")
 	{
 		communities.POST("", h.createCommunity)                 // 创建帖子

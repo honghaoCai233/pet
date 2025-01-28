@@ -18,7 +18,7 @@ func NewPetHandler(opt *Option) *PetHandler {
 	}
 }
 
-func (h *PetHandler) RegisterRoutes(r *gin.RouterGroup) {
+func (h *PetHandler) RegisterRoute(r *gin.RouterGroup) {
 	pets := r.Group("/pets")
 	{
 		pets.POST("", h.createPet)                      // 创建宠物

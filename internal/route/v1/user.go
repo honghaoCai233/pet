@@ -18,7 +18,7 @@ func NewUserHandler(opt *Option) *UserHandler {
 	}
 }
 
-func (h *UserHandler) RegisterRoutes(r *gin.RouterGroup) {
+func (h *UserHandler) RegisterRoute(r *gin.RouterGroup) {
 	users := r.Group("/users")
 	{
 		users.POST("", h.createUser)                 // 创建用户

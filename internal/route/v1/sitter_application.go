@@ -18,7 +18,7 @@ func NewSitterApplicationHandler(opt *Option) *SitterApplicationHandler {
 	}
 }
 
-func (h *SitterApplicationHandler) RegisterRoutes(r *gin.RouterGroup) {
+func (h *SitterApplicationHandler) RegisterRoute(r *gin.RouterGroup) {
 	applications := r.Group("/sitter-applications")
 	{
 		applications.POST("", h.createApplication)                      // 创建申请

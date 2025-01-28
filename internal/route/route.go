@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	v1 "pet/internal/route/v1"
 	"syscall"
 	"time"
 
@@ -39,6 +40,7 @@ type HttpEngine struct {
 	log         *zap.SugaredLogger
 	conf        *configs.Config
 	handler     *gin.Engine
+	routers     []v1.Router
 	userService *service.UserService
 }
 
@@ -56,7 +58,10 @@ func NewHttpEngine(opt *WireOption) *HttpEngine {
 }
 
 func (h *HttpEngine) registerRoute() {
-	//r := h.handler.Group("/api/v1")
+	r := h.handler.Group("/api/v1")
+	for _, router := range h.routers {
+		router.RegisterRoute(r)
+	}
 }
 
 func (h *HttpEngine) Run() error {

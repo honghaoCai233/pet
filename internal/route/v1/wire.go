@@ -17,9 +17,5 @@ type Option struct {
 // ProviderSet is router providers.
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(Option), "*"),
-	NewUserHandler,
-	NewPetHandler,
-	NewTaskHandler,
-	NewCommunityHandler,
-	NewSitterApplicationHandler,
+	NewRouters,
 )
