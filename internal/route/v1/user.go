@@ -1,4 +1,4 @@
-package user
+package v1
 
 import (
 	"pet/internal/dto/request"

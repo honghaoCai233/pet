@@ -30,8 +30,6 @@ type Redis struct {
 type Config struct {
 	App      App           `yaml:"App"`
 	MasterDB DB            `yaml:"MasterDB"`
-	SlaveDB  DB            `yaml:"SlaveDB"`
-	StatsDB  DB            `yaml:"StatsDB"`
 	Redis    Redis         `yaml:"Redis"`
 	Log      logger.Config `yaml:"Log"`
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/google/wire"
 	"go.uber.org/zap"
 	"pet/configs"
-	v1user "pet/internal/route/v1/user"
+	v1user "pet/internal/route/v1"
 	"pet/internal/service"
 )
 

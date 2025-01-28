@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"pkg/ecode"
+	"pet/pkg/ecode"
 )
 
 type Response struct {

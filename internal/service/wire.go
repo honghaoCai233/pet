@@ -8,8 +8,8 @@ import (
 )
 
 type Option struct {
-	config   *configs.Config
-	userRepo *data.User
+	Config   *configs.Config
+	UserRepo *data.User
 }
 
 var ProviderSet = wire.NewSet(
