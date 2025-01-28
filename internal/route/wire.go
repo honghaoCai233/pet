@@ -18,8 +18,8 @@ type WireOption struct {
 }
 
 var ProviderSet = wire.NewSet(
+	NewGinEngine,
 	wire.Struct(new(WireOption), "*"),
 	v1.ProviderSet,
-	NewGinEngine,
 	NewHttpEngine,
 )

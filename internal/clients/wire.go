@@ -2,7 +2,6 @@ package clients
 
 import (
 	"context"
-
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"

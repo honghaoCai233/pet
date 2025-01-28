@@ -30,7 +30,7 @@ func NewGinEngine(conf *configs.Config) *gin.Engine {
 	r.Use(
 		gin.Logger(),
 		gin.Recovery(),
-		middleware.Cors(true),
+		middleware.Cors(),
 	)
 	return r
 }

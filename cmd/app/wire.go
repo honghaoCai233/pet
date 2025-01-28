@@ -4,7 +4,6 @@
 package main
 
 import (
-	"github.com/google/wire"
 	"pet/configs"
 	"pet/internal/clients"
 	"pet/internal/cmd"
@@ -12,6 +11,8 @@ import (
 	"pet/internal/data"
 	"pet/internal/route"
 	"pet/internal/service"
+
+	"github.com/google/wire"
 )
 
 func build() (*cmd.App, func(), error) {
