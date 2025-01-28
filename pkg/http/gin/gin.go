@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"pkg/http/gin/middleware"
+	"pet/pkg/http/gin/middleware"
 )
 
 func NewGinEngine(mode string, logger ...io.Writer) *gin.Engine {
