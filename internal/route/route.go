@@ -17,7 +17,6 @@ import (
 	"pet/configs"
 	"pet/internal/route/common"
 	"pet/internal/route/middleware"
-	"pet/internal/service"
 )
 
 func NewGinEngine(conf *configs.Config) *gin.Engine {
@@ -37,11 +36,10 @@ func NewGinEngine(conf *configs.Config) *gin.Engine {
 }
 
 type HttpEngine struct {
-	log         *zap.SugaredLogger
-	conf        *configs.Config
-	handler     *gin.Engine
-	routers     []v1.Router
-	userService *service.UserService
+	log     *zap.SugaredLogger
+	conf    *configs.Config
+	handler *gin.Engine
+	routers []v1.Router
 }
 
 type Registrable interface {
@@ -50,10 +48,10 @@ type Registrable interface {
 
 func NewHttpEngine(opt *WireOption) *HttpEngine {
 	return &HttpEngine{
-		log:         opt.Log,
-		conf:        opt.Conf,
-		handler:     opt.Handler,
-		userService: opt.UserService,
+		log:     opt.Log,
+		conf:    opt.Conf,
+		handler: opt.Handler,
+		routers: opt.Routers,
 	}
 }
 

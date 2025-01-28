@@ -3,7 +3,6 @@ package route
 import (
 	"pet/configs"
 	v1 "pet/internal/route/v1"
-	"pet/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
@@ -15,7 +14,7 @@ type WireOption struct {
 	Conf    *configs.Config
 	Handler *gin.Engine
 
-	UserService *service.UserService
+	Routers []v1.Router
 }
 
 var ProviderSet = wire.NewSet(
