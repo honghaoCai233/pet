@@ -1,12 +1,13 @@
 package route
 
 import (
+	"pet/configs"
+	v1 "pet/internal/route/v1"
+	"pet/internal/service"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"go.uber.org/zap"
-	"pet/configs"
-	v1user "pet/internal/route/v1"
-	"pet/internal/service"
 )
 
 type WireOption struct {
@@ -19,7 +20,7 @@ type WireOption struct {
 
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(WireOption), "*"),
-	v1user.ProviderSet,
+	v1.ProviderSet,
 	NewGinEngine,
 	NewHttpEngine,
 )

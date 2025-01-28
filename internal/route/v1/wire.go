@@ -7,10 +7,17 @@ import (
 )
 
 type Option struct {
-	UserSrv *service.UserService
+	UserSrv      *service.UserService
+	PetSrv       *service.PetService
+	TaskSrv      *service.TaskService
+	CommunitySrv *service.CommunityService
 }
 
+// ProviderSet is router providers.
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(Option), "*"),
-	NewUser,
+	NewUserHandler,
+	NewPetHandler,
+	NewTaskHandler,
+	NewCommunityHandler,
 )

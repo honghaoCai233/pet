@@ -8,11 +8,17 @@ import (
 )
 
 type Option struct {
-	config   *configs.Config
-	userRepo *data.User
+	Config        *configs.Config
+	UserRepo      *data.UserRepo
+	PetRepo       *data.PetRepo
+	TaskRepo      *data.TaskRepo
+	CommunityRepo *data.CommunityRepo
 }
 
 var ProviderSet = wire.NewSet(
 	wire.Struct(new(Option), "*"),
-	NewUser,
+	NewUserService,
+	NewPetService,
+	NewTaskService,
+	NewCommunityService,
 )
