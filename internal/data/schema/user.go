@@ -2,6 +2,7 @@ package schema
 
 import (
 	"fmt"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
@@ -46,5 +47,41 @@ func (User) Fields() []ent.Field {
 			Optional().
 			Default(0).
 			Comment("完成的任务数量"),
+		field.String("username").
+			Unique().
+			NotEmpty().
+			Comment("用户名，用于登录"),
+		field.String("email").
+			Unique().
+			Optional().
+			Comment("邮箱，可用于登录和找回密码"),
+		field.String("password").
+			Sensitive().
+			NotEmpty().
+			Comment("密码哈希值"),
+		field.String("salt").
+			Sensitive().
+			Comment("密码加密盐值"),
+		field.Time("last_login_at").
+			Optional().
+			Comment("最后登录时间"),
+		field.String("status").
+			Default("active").
+			Comment("用户状态：active-正常, disabled-禁用, locked-锁定").
+			Validate(func(s string) error {
+				switch s {
+				case "active", "disabled", "locked":
+					return nil
+				default:
+					return fmt.Errorf("invalid status type %q", s)
+				}
+			}),
+		field.Time("created_at").
+			Default(time.Now).
+			Comment("创建时间"),
+		field.Time("updated_at").
+			Default(time.Now).
+			UpdateDefault(time.Now).
+			Comment("更新时间"),
 	}
 }
