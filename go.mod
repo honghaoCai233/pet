@@ -24,6 +24,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/unidoc/unipdf/v3 v3.66.0
 	go.uber.org/zap v1.27.0
+	golang.org/x/crypto v0.32.0
 	golang.org/x/text v0.21.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
@@ -76,7 +77,6 @@ require (
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/arch v0.12.0 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
 	golang.org/x/exp v0.0.0-20240525044651-4c93da0ed11d // indirect
 	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/mod v0.20.0 // indirect

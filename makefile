@@ -11,4 +11,4 @@ generate:
 
 build: generate
 	go mod tidy -v
-	go build -tags=jsoniter -o=output/server cmd/app/main.go cmd/app/wire_gen.go
+	go build -tags=jsoniter -o=output/pet_server cmd/app/main.go cmd/app/wire_gen.go
