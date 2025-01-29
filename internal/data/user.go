@@ -53,7 +53,7 @@ func (r *UserRepo) Register(ctx context.Context, u *ent.User) (*ent.User, error)
 		return nil, err
 	}
 	if exists {
-		return nil, fmt.Errorf("phone number already exists")
+		return nil, fmt.Errorf("该手机号已注册")
 	}
 
 	// 生成盐值
