@@ -3,6 +3,7 @@ package v1
 import (
 	"pet/internal/data/ent"
 	"pet/internal/service"
+	"pet/pkg/http/gin/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -84,24 +85,36 @@ func (h *UserHandler) register(c *gin.Context) {
 
 // login 用户登录
 func (h *UserHandler) login(c *gin.Context) {
+	ctx := c.Request.Context()
 	var req struct {
 		Username string `json:"username" binding:"required"` // 可以是用户名或邮箱
 		Password string `json:"password" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":  400,
+			"data":  nil,
+			"error": err.Error(),
+		})
 		return
 	}
 
-	user, err := h.userService.LoginUser(c.Request.Context(), req.Username, req.Password)
-	if err != nil {
-		c.JSON(401, gin.H{"error": err.Error()})
-		return
-	}
-
-	// TODO: 生成 JWT token
-	c.JSON(200, user)
+	//user, err := h.userService.LoginUser(c.Request.Context(), req.Username, req.Password)
+	//if err != nil {
+	//	c.JSON(401, gin.H{
+	//		"code":  401,
+	//		"data":  nil,
+	//		"error": err.Error(),
+	//	})
+	//	return
+	//}
+	//
+	//c.JSON(200, gin.H{
+	//	"code": 200,
+	//	"data": user,
+	//})
+	utils.NewResponse(c)(h.userService.LoginUser(ctx, req.Username, req.Password))
 }
 
 // changePassword 修改密码

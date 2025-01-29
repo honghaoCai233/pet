@@ -25,7 +25,7 @@ func newResponse(data any, err error) (int, *Response) {
 
 	ec := ecode.FromError(err)
 	if ec != nil {
-		code = ec.Code
+		code = ec.HttpCode
 		msg = ec.Message
 		httpCode = ec.HttpCode
 	}
@@ -33,7 +33,7 @@ func newResponse(data any, err error) (int, *Response) {
 		msg = ecode.InternalErr.WithCause(err).Error()
 	}
 
-	rv.Code = code
+	rv.Code = httpCode
 	rv.Message = msg
 	rv.Data = data
 
@@ -46,7 +46,8 @@ func ErrorResponse(c *gin.Context, err error) {
 }
 
 func SuccessResponse(c *gin.Context, data any) {
-	c.JSON(newResponse(data, nil))
+	response, r := newResponse(data, nil)
+	c.JSON(response, r)
 }
 
 func NewResponse(c *gin.Context) func(data any, err error) {
