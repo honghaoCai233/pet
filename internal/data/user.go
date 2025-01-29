@@ -76,7 +76,6 @@ func (r *UserRepo) Register(ctx context.Context, u *ent.User) (*ent.User, error)
 		SetSalt(salt).
 		SetAddress(u.Address).
 		SetAge(u.Age).
-		SetRole(u.Role).
 		SetStatus("active").
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now()).

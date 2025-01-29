@@ -44,10 +44,10 @@ func (h *UserHandler) register(c *gin.Context) {
 	var req struct {
 		Phone       string  `json:"phone" binding:"required"`
 		Password    string  `json:"password" binding:"required,min=6"`
-		Name        string  `json:"name" binding:"required"`
+		Name        string  `json:"name"`
 		Address     string  `json:"address"`
-		Age         int     `json:"age" binding:"required"`
-		Role        string  `json:"role"`
+		Age         int     `json:"age"`
+		Role        string  `json:"role" default:"pet_sitter"`
 		Description string  `json:"description"`
 		Rating      float64 `json:"rating"`
 	}
