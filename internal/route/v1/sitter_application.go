@@ -3,6 +3,7 @@ package v1
 import (
 	"pet/internal/data/ent"
 	"pet/internal/service"
+	"pet/pkg/http/gin/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -47,7 +48,11 @@ func (h *SitterApplicationHandler) createApplication(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&application); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -62,20 +67,18 @@ func (h *SitterApplicationHandler) createApplication(c *gin.Context) {
 		ExpectedSalary: application.ExpectedSalary,
 	}
 
-	result, err := h.applicationService.CreateApplication(c.Request.Context(), entApplication)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, result)
+	utils.NewResponse(c)(h.applicationService.CreateApplication(c.Request.Context(), entApplication))
 }
 
 // updateApplication 更新申请
 func (h *SitterApplicationHandler) updateApplication(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
@@ -87,7 +90,11 @@ func (h *SitterApplicationHandler) updateApplication(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&application); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -99,46 +106,50 @@ func (h *SitterApplicationHandler) updateApplication(c *gin.Context) {
 		ExpectedSalary: application.ExpectedSalary,
 	}
 
-	result, err := h.applicationService.UpdateApplication(c.Request.Context(), entApplication)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, result)
+	utils.NewResponse(c)(h.applicationService.UpdateApplication(c.Request.Context(), entApplication))
 }
 
 // getApplication 获取申请
 func (h *SitterApplicationHandler) getApplication(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
-	application, err := h.applicationService.GetApplication(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, application)
+	utils.NewResponse(c)(h.applicationService.GetApplication(c.Request.Context(), id))
 }
 
 // deleteApplication 删除申请
 func (h *SitterApplicationHandler) deleteApplication(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	if err := h.applicationService.DeleteApplication(c.Request.Context(), id); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }
 
 // listApplications 申请列表
@@ -146,64 +157,52 @@ func (h *SitterApplicationHandler) listApplications(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-	applications, err := h.applicationService.ListApplications(c.Request.Context(), page, pageSize)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, applications)
+	utils.NewResponse(c)(h.applicationService.ListApplications(c.Request.Context(), page, pageSize))
 }
 
 // listApplicationsBySitter 获取照护者的申请列表
 func (h *SitterApplicationHandler) listApplicationsBySitter(c *gin.Context) {
 	sitterID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid sitter id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid sitter id",
+		})
 		return
 	}
 
-	applications, err := h.applicationService.ListApplicationsBySitter(c.Request.Context(), sitterID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, applications)
+	utils.NewResponse(c)(h.applicationService.ListApplicationsBySitter(c.Request.Context(), sitterID))
 }
 
 // listApplicationsByOwner 获取宠物主人收到的申请列表
 func (h *SitterApplicationHandler) listApplicationsByOwner(c *gin.Context) {
 	ownerID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid owner id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid owner id",
+		})
 		return
 	}
 
-	applications, err := h.applicationService.ListApplicationsByOwner(c.Request.Context(), ownerID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, applications)
+	utils.NewResponse(c)(h.applicationService.ListApplicationsByOwner(c.Request.Context(), ownerID))
 }
 
 // listApplicationsByPet 获取宠物的申请列表
 func (h *SitterApplicationHandler) listApplicationsByPet(c *gin.Context) {
 	petID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid pet id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid pet id",
+		})
 		return
 	}
 
-	applications, err := h.applicationService.ListApplicationsByPet(c.Request.Context(), petID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, applications)
+	utils.NewResponse(c)(h.applicationService.ListApplicationsByPet(c.Request.Context(), petID))
 }
 
 // listApplicationsByStatus 获取指定状态的申请列表
@@ -212,20 +211,18 @@ func (h *SitterApplicationHandler) listApplicationsByStatus(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-	applications, err := h.applicationService.ListApplicationsByStatus(c.Request.Context(), status, page, pageSize)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, applications)
+	utils.NewResponse(c)(h.applicationService.ListApplicationsByStatus(c.Request.Context(), status, page, pageSize))
 }
 
 // updateApplicationStatus 更新申请状态
 func (h *SitterApplicationHandler) updateApplicationStatus(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
@@ -235,14 +232,26 @@ func (h *SitterApplicationHandler) updateApplicationStatus(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
 	if err := h.applicationService.UpdateApplicationStatus(c.Request.Context(), id, req.Status, req.RejectReason); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }

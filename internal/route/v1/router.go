@@ -14,6 +14,7 @@ func NewRouters(opt *Option) []Router {
 		NewTaskHandler(opt),
 		NewCommunityHandler(opt),
 		NewSitterApplicationHandler(opt),
+		NewAddressHandler(opt),
 	)
 	return rv
 }
