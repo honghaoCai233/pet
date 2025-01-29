@@ -77,6 +77,9 @@ func (r *UserRepo) Register(ctx context.Context, u *ent.User) (*ent.User, error)
 		SetAddress(u.Address).
 		SetAge(u.Age).
 		SetStatus("active").
+		SetAvatar(u.Avatar).
+		SetGender(u.Gender).
+		SetBirthday(u.Birthday).
 		SetCreatedAt(time.Now()).
 		SetUpdatedAt(time.Now()).
 		Save(ctx)
@@ -104,7 +107,7 @@ func (r *UserRepo) Login(ctx context.Context, phone, password string) (*ent.User
 		return nil, fmt.Errorf("invalid phone or password")
 	}
 
-	// 更新最后登录时间
+	// 更新最后登录时间并返回完整的用户信息
 	return r.data.db.User.UpdateOne(u).
 		SetLastLoginAt(time.Now()).
 		Save(ctx)
@@ -169,6 +172,15 @@ func (r *UserRepo) Update(ctx context.Context, u *ent.User) (*ent.User, error) {
 	}
 	if u.CompletedTasks != 0 {
 		builder.SetCompletedTasks(u.CompletedTasks)
+	}
+	if u.Avatar != "" {
+		builder.SetAvatar(u.Avatar)
+	}
+	if u.Gender != "" {
+		builder.SetGender(u.Gender)
+	}
+	if u.Birthday != "" {
+		builder.SetBirthday(u.Birthday)
 	}
 
 	return builder.Save(ctx)

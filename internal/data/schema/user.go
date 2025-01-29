@@ -27,6 +27,24 @@ func (User) Fields() []ent.Field {
 			NotEmpty().
 			Comment("手机号，用于登录"),
 		field.Int("age"),
+		field.String("avatar").
+			Optional().
+			Comment("用户头像URL"),
+		field.String("gender").
+			Optional().
+			Default("").
+			Comment("用户性别：male-男, female-女").
+			Validate(func(s string) error {
+				switch s {
+				case "", "male", "female":
+					return nil
+				default:
+					return fmt.Errorf("invalid gender type %q", s)
+				}
+			}),
+		field.String("birthday").
+			Optional().
+			Comment("用户生日，格式：YYYY-MM-DD"),
 		field.String("role").
 			Default(RoleTaskPublisher).
 			Optional().

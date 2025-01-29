@@ -50,6 +50,9 @@ func (h *UserHandler) register(c *gin.Context) {
 		Role        string  `json:"role" default:"pet_sitter"`
 		Description string  `json:"description"`
 		Rating      float64 `json:"rating"`
+		Avatar      string  `json:"avatar"`
+		Gender      string  `json:"gender" binding:"omitempty,oneof=male female"`
+		Birthday    string  `json:"birthday"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -70,6 +73,9 @@ func (h *UserHandler) register(c *gin.Context) {
 		Role:        req.Role,
 		Description: req.Description,
 		Rating:      req.Rating,
+		Avatar:      req.Avatar,
+		Gender:      req.Gender,
+		Birthday:    req.Birthday,
 	}
 
 	utils.NewResponse(c)(h.userService.RegisterUser(c.Request.Context(), user))
@@ -196,7 +202,9 @@ func (h *UserHandler) updateUser(c *gin.Context) {
 		Role        string  `json:"role"`
 		Description string  `json:"description"`
 		Rating      float64 `json:"rating"`
-		Email       string  `json:"email"`
+		Avatar      string  `json:"avatar"`
+		Gender      string  `json:"gender" binding:"omitempty,oneof=male female"`
+		Birthday    string  `json:"birthday"`
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -217,6 +225,9 @@ func (h *UserHandler) updateUser(c *gin.Context) {
 		Role:        req.Role,
 		Description: req.Description,
 		Rating:      req.Rating,
+		Avatar:      req.Avatar,
+		Gender:      req.Gender,
+		Birthday:    req.Birthday,
 	}
 
 	utils.NewResponse(c)(h.userService.UpdateUser(c.Request.Context(), user))
