@@ -45,28 +45,15 @@ func hashPassword(password, salt string) (string, error) {
 
 // Register 用户注册
 func (r *UserRepo) Register(ctx context.Context, u *ent.User) (*ent.User, error) {
-	// 检查用户名是否已存在
+	// 检查手机号是否已存在
 	exists, err := r.data.db.User.Query().
-		Where(user.Username(u.Username)).
+		Where(user.Phone(u.Phone)).
 		Exist(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if exists {
-		return nil, fmt.Errorf("username already exists")
-	}
-
-	// 如果提供了邮箱，检查邮箱是否已存在
-	if u.Email != "" {
-		exists, err = r.data.db.User.Query().
-			Where(user.Email(u.Email)).
-			Exist(ctx)
-		if err != nil {
-			return nil, err
-		}
-		if exists {
-			return nil, fmt.Errorf("email already exists")
-		}
+		return nil, fmt.Errorf("phone number already exists")
 	}
 
 	// 生成盐值
@@ -83,12 +70,10 @@ func (r *UserRepo) Register(ctx context.Context, u *ent.User) (*ent.User, error)
 
 	// 创建用户
 	return r.data.db.User.Create().
-		SetUsername(u.Username).
-		SetPassword(hashedPassword).
-		SetSalt(salt).
-		SetEmail(u.Email).
 		SetName(u.Name).
 		SetPhone(u.Phone).
+		SetPassword(hashedPassword).
+		SetSalt(salt).
 		SetAddress(u.Address).
 		SetAge(u.Age).
 		SetRole(u.Role).
@@ -99,17 +84,13 @@ func (r *UserRepo) Register(ctx context.Context, u *ent.User) (*ent.User, error)
 }
 
 // Login 用户登录
-func (r *UserRepo) Login(ctx context.Context, username, password string) (*ent.User, error) {
+func (r *UserRepo) Login(ctx context.Context, phone, password string) (*ent.User, error) {
 	// 查找用户
 	u, err := r.data.db.User.Query().
-		Where(
-			user.Or(
-				user.Username(username),
-				user.Email(username),
-			),
-		).Only(ctx)
+		Where(user.Phone(phone)).
+		Only(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("invalid username or password")
+		return nil, fmt.Errorf("invalid phone or password")
 	}
 
 	// 检查用户状态
@@ -121,7 +102,7 @@ func (r *UserRepo) Login(ctx context.Context, username, password string) (*ent.U
 	combined := password + u.Salt
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(combined))
 	if err != nil {
-		return nil, fmt.Errorf("invalid username or password")
+		return nil, fmt.Errorf("invalid phone or password")
 	}
 
 	// 更新最后登录时间
@@ -190,24 +171,14 @@ func (r *UserRepo) Update(ctx context.Context, u *ent.User) (*ent.User, error) {
 	if u.CompletedTasks != 0 {
 		builder.SetCompletedTasks(u.CompletedTasks)
 	}
-	if u.Email != "" {
-		builder.SetEmail(u.Email)
-	}
 
 	return builder.Save(ctx)
 }
 
-// GetByUsername 通过用户名查找用户
-func (r *UserRepo) GetByUsername(ctx context.Context, username string) (*ent.User, error) {
+// GetByPhone 通过手机号查找用户
+func (r *UserRepo) GetByPhone(ctx context.Context, phone string) (*ent.User, error) {
 	return r.data.db.User.Query().
-		Where(user.Username(username)).
-		Only(ctx)
-}
-
-// GetByEmail 通过邮箱查找用户
-func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*ent.User, error) {
-	return r.data.db.User.Query().
-		Where(user.Email(email)).
+		Where(user.PhoneEQ(phone)).
 		Only(ctx)
 }
 
@@ -226,10 +197,4 @@ func (r *UserRepo) List(ctx context.Context, page, pageSize int) ([]*ent.User, e
 		Offset(offset).
 		Limit(pageSize).
 		All(ctx)
-}
-
-func (r *UserRepo) GetByPhone(ctx context.Context, phone string) (*ent.User, error) {
-	return r.data.db.User.Query().
-		Where(user.PhoneEQ(phone)).
-		Only(ctx)
 }

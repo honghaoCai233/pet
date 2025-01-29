@@ -22,7 +22,10 @@ func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("name"),
 		field.String("address"),
-		field.String("phone"),
+		field.String("phone").
+			Unique().
+			NotEmpty().
+			Comment("手机号，用于登录"),
 		field.Int("age"),
 		field.String("role").
 			Default(RoleTaskPublisher).
@@ -47,14 +50,6 @@ func (User) Fields() []ent.Field {
 			Optional().
 			Default(0).
 			Comment("完成的任务数量"),
-		field.String("username").
-			Unique().
-			NotEmpty().
-			Comment("用户名，用于登录"),
-		field.String("email").
-			Unique().
-			Optional().
-			Comment("邮箱，可用于登录和找回密码"),
 		field.String("password").
 			Sensitive().
 			NotEmpty().
