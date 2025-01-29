@@ -157,21 +157,12 @@ func (r *UserRepo) UpdateStatus(ctx context.Context, userID int, status string) 
 // Update 更新用户信息
 func (r *UserRepo) Update(ctx context.Context, u *ent.User) (*ent.User, error) {
 	builder := r.data.db.User.UpdateOneID(u.ID).
-		SetName(u.Name).
-		SetAddress(u.Address).
-		SetPhone(u.Phone).
-		SetAge(u.Age).
-		SetRole(u.Role).
 		SetUpdatedAt(time.Now())
-
+	if u.Name != "" {
+		builder.SetName(u.Name)
+	}
 	if u.Description != "" {
 		builder.SetDescription(u.Description)
-	}
-	if u.Rating != 0 {
-		builder.SetRating(u.Rating)
-	}
-	if u.CompletedTasks != 0 {
-		builder.SetCompletedTasks(u.CompletedTasks)
 	}
 	if u.Avatar != "" {
 		builder.SetAvatar(u.Avatar)
