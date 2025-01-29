@@ -3,6 +3,7 @@ package v1
 import (
 	"pet/internal/data/ent"
 	"pet/internal/service"
+	"pet/pkg/http/gin/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -47,7 +48,11 @@ func (h *PetHandler) createPet(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&pet); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -65,20 +70,18 @@ func (h *PetHandler) createPet(c *gin.Context) {
 		Vaccinated:       pet.Vaccinated,
 	}
 
-	result, err := h.petService.CreatePet(c.Request.Context(), entPet)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, result)
+	utils.NewResponse(c)(h.petService.CreatePet(c.Request.Context(), entPet))
 }
 
 // updatePet 更新宠物
 func (h *PetHandler) updatePet(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
@@ -97,7 +100,11 @@ func (h *PetHandler) updatePet(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&pet); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -116,46 +123,50 @@ func (h *PetHandler) updatePet(c *gin.Context) {
 		Vaccinated:       pet.Vaccinated,
 	}
 
-	result, err := h.petService.UpdatePet(c.Request.Context(), entPet)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, result)
+	utils.NewResponse(c)(h.petService.UpdatePet(c.Request.Context(), entPet))
 }
 
 // getPet 获取宠物
 func (h *PetHandler) getPet(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
-	pet, err := h.petService.GetPet(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, pet)
+	utils.NewResponse(c)(h.petService.GetPet(c.Request.Context(), id))
 }
 
 // deletePet 删除宠物
 func (h *PetHandler) deletePet(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	if err := h.petService.DeletePet(c.Request.Context(), id); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }
 
 // listPets 宠物列表
@@ -163,28 +174,20 @@ func (h *PetHandler) listPets(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-	pets, err := h.petService.ListPets(c.Request.Context(), page, pageSize)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, pets)
+	utils.NewResponse(c)(h.petService.ListPets(c.Request.Context(), page, pageSize))
 }
 
 // listPetsByOwner 获取用户的宠物列表
 func (h *PetHandler) listPetsByOwner(c *gin.Context) {
 	ownerID, err := strconv.Atoi(c.Param("owner_id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid owner_id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid owner_id",
+		})
 		return
 	}
 
-	pets, err := h.petService.ListPetsByOwner(c.Request.Context(), ownerID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, pets)
+	utils.NewResponse(c)(h.petService.ListPetsByOwner(c.Request.Context(), ownerID))
 }

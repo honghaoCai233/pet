@@ -3,6 +3,7 @@ package v1
 import (
 	"pet/internal/data/ent"
 	"pet/internal/service"
+	"pet/pkg/http/gin/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -18,7 +19,7 @@ func NewAddressHandler(opt *Option) *AddressHandler {
 	}
 }
 
-func (h *AddressHandler) RegisterRoutes(r *gin.RouterGroup) {
+func (h *AddressHandler) RegisterRoute(r *gin.RouterGroup) {
 	addresses := r.Group("/addresses")
 	{
 		addresses.POST("", h.createAddress)                         // 创建地址
@@ -48,7 +49,11 @@ func (h *AddressHandler) createAddress(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&address); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -65,20 +70,18 @@ func (h *AddressHandler) createAddress(c *gin.Context) {
 		IsDefault:    address.IsDefault,
 	}
 
-	result, err := h.addressService.CreateAddress(c.Request.Context(), entAddress)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, result)
+	utils.NewResponse(c)(h.addressService.CreateAddress(c.Request.Context(), entAddress))
 }
 
 // updateAddress 更新地址
 func (h *AddressHandler) updateAddress(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
@@ -95,7 +98,11 @@ func (h *AddressHandler) updateAddress(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&address); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -112,46 +119,50 @@ func (h *AddressHandler) updateAddress(c *gin.Context) {
 		IsDefault:    address.IsDefault,
 	}
 
-	result, err := h.addressService.UpdateAddress(c.Request.Context(), entAddress)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, result)
+	utils.NewResponse(c)(h.addressService.UpdateAddress(c.Request.Context(), entAddress))
 }
 
 // getAddress 获取地址
 func (h *AddressHandler) getAddress(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
-	address, err := h.addressService.GetAddress(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, address)
+	utils.NewResponse(c)(h.addressService.GetAddress(c.Request.Context(), id))
 }
 
 // deleteAddress 删除地址
 func (h *AddressHandler) deleteAddress(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	if err := h.addressService.DeleteAddress(c.Request.Context(), id); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }
 
 // listAddresses 地址列表
@@ -159,67 +170,73 @@ func (h *AddressHandler) listAddresses(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-	addresses, err := h.addressService.ListAddresses(c.Request.Context(), page, pageSize)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, addresses)
+	utils.NewResponse(c)(h.addressService.ListAddresses(c.Request.Context(), page, pageSize))
 }
 
 // listAddressesByUser 获取用户的地址列表
 func (h *AddressHandler) listAddressesByUser(c *gin.Context) {
 	userID, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid user_id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid user_id",
+		})
 		return
 	}
 
-	addresses, err := h.addressService.ListAddressesByUser(c.Request.Context(), userID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, addresses)
+	utils.NewResponse(c)(h.addressService.ListAddressesByUser(c.Request.Context(), userID))
 }
 
 // getDefaultAddress 获取用户的默认地址
 func (h *AddressHandler) getDefaultAddress(c *gin.Context) {
 	userID, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid user_id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid user_id",
+		})
 		return
 	}
 
-	address, err := h.addressService.GetDefaultAddress(c.Request.Context(), userID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, address)
+	utils.NewResponse(c)(h.addressService.GetDefaultAddress(c.Request.Context(), userID))
 }
 
 // setDefaultAddress 设置默认地址
 func (h *AddressHandler) setDefaultAddress(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	userID, err := strconv.Atoi(c.Param("user_id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid user_id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid user_id",
+		})
 		return
 	}
 
 	if err := h.addressService.SetDefaultAddress(c.Request.Context(), id, userID); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }

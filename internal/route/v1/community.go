@@ -5,6 +5,7 @@ import (
 	"pet/internal/dto/request"
 	"pet/internal/dto/response"
 	"pet/internal/service"
+	"pet/pkg/http/gin/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +41,11 @@ func (h *CommunityHandler) RegisterRoute(r *gin.RouterGroup) {
 func (h *CommunityHandler) createCommunity(c *gin.Context) {
 	var req request.CreateCommunityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -57,24 +62,40 @@ func (h *CommunityHandler) createCommunity(c *gin.Context) {
 
 	result, err := h.communityService.CreateCommunity(c.Request.Context(), community)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, response.NewCommunityResponse(result))
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    response.NewCommunityResponse(result),
+		"message": "success",
+	})
 }
 
 // updateCommunity 更新帖子
 func (h *CommunityHandler) updateCommunity(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	var req request.UpdateCommunityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -90,151 +111,175 @@ func (h *CommunityHandler) updateCommunity(c *gin.Context) {
 		IsPinned: req.IsPinned,
 	}
 
-	result, err := h.communityService.UpdateCommunity(c.Request.Context(), community)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewCommunityResponse(result))
+	utils.NewResponse(c)(h.communityService.UpdateCommunity(c.Request.Context(), community))
 }
 
 // getCommunity 获取帖子
 func (h *CommunityHandler) getCommunity(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
-	community, err := h.communityService.GetCommunity(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewCommunityResponse(community))
+	utils.NewResponse(c)(h.communityService.GetCommunity(c.Request.Context(), id))
 }
 
 // deleteCommunity 删除帖子
 func (h *CommunityHandler) deleteCommunity(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	if err := h.communityService.DeleteCommunity(c.Request.Context(), id); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }
 
 // listCommunity 帖子列表
 func (h *CommunityHandler) listCommunity(c *gin.Context) {
 	var req request.ListCommunityRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	communities, err := h.communityService.ListCommunity(c.Request.Context(), req.Page, req.PageSize)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewCommunityListResponse(communities, int64(len(communities))))
+	utils.NewResponse(c)(h.communityService.ListCommunity(c.Request.Context(), req.Page, req.PageSize))
 }
 
 // listCommunityByAuthor 获取用户的帖子
 func (h *CommunityHandler) listCommunityByAuthor(c *gin.Context) {
 	authorID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid author id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid author id",
+		})
 		return
 	}
 
-	communities, err := h.communityService.ListCommunityByAuthor(c.Request.Context(), authorID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewCommunityListResponse(communities, int64(len(communities))))
+	utils.NewResponse(c)(h.communityService.ListCommunityByAuthor(c.Request.Context(), authorID))
 }
 
 // listCommunityByPet 获取宠物的帖子
 func (h *CommunityHandler) listCommunityByPet(c *gin.Context) {
 	petID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid pet id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid pet id",
+		})
 		return
 	}
 
-	communities, err := h.communityService.ListCommunityByPet(c.Request.Context(), petID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewCommunityListResponse(communities, int64(len(communities))))
+	utils.NewResponse(c)(h.communityService.ListCommunityByPet(c.Request.Context(), petID))
 }
 
 // listCommunityByType 获取指定类型的帖子
 func (h *CommunityHandler) listCommunityByType(c *gin.Context) {
 	var req request.ListCommunityRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
 	postType := c.Param("type")
-	communities, err := h.communityService.ListCommunityByType(c.Request.Context(), postType, req.Page, req.PageSize)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewCommunityListResponse(communities, int64(len(communities))))
+	utils.NewResponse(c)(h.communityService.ListCommunityByType(c.Request.Context(), postType, req.Page, req.PageSize))
 }
 
 // updateCommunityLikes 更新点赞数
 func (h *CommunityHandler) updateCommunityLikes(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	var req request.UpdateCommunityLikesRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
 	if err := h.communityService.UpdateCommunityLikes(c.Request.Context(), id, req.Increment); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }
 
 // updateCommunityViews 更新浏览量
 func (h *CommunityHandler) updateCommunityViews(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	if err := h.communityService.UpdateCommunityViews(c.Request.Context(), id); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }

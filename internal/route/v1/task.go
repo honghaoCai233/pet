@@ -3,8 +3,8 @@ package v1
 import (
 	"pet/internal/data/ent"
 	"pet/internal/dto/request"
-	"pet/internal/dto/response"
 	"pet/internal/service"
+	"pet/pkg/http/gin/utils"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -39,7 +39,11 @@ func (h *TaskHandler) RegisterRoute(r *gin.RouterGroup) {
 func (h *TaskHandler) createTask(c *gin.Context) {
 	var req request.CreateTaskRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -57,26 +61,28 @@ func (h *TaskHandler) createTask(c *gin.Context) {
 		CareInstructions: req.CareInstructions,
 	}
 
-	result, err := h.taskService.CreateTask(c.Request.Context(), entTask)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewTaskResponse(result))
+	utils.NewResponse(c)(h.taskService.CreateTask(c.Request.Context(), entTask))
 }
 
 // updateTask 更新任务
 func (h *TaskHandler) updateTask(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	var req request.UpdateTaskRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
@@ -96,135 +102,146 @@ func (h *TaskHandler) updateTask(c *gin.Context) {
 		SitterID:         req.SitterID,
 	}
 
-	result, err := h.taskService.UpdateTask(c.Request.Context(), entTask)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewTaskResponse(result))
+	utils.NewResponse(c)(h.taskService.UpdateTask(c.Request.Context(), entTask))
 }
 
 // getTask 获取任务
 func (h *TaskHandler) getTask(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
-	task, err := h.taskService.GetTask(c.Request.Context(), id)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewTaskResponse(task))
+	utils.NewResponse(c)(h.taskService.GetTask(c.Request.Context(), id))
 }
 
 // deleteTask 删除任务
 func (h *TaskHandler) deleteTask(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	if err := h.taskService.DeleteTask(c.Request.Context(), id); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }
 
 // listTasks 任务列表
 func (h *TaskHandler) listTasks(c *gin.Context) {
 	var req request.ListTasksRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	tasks, err := h.taskService.ListTasks(c.Request.Context(), req.Page, req.PageSize)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	// TODO: 获取总数
-	c.JSON(200, response.NewTaskListResponse(tasks, int64(len(tasks))))
+	utils.NewResponse(c)(h.taskService.ListTasks(c.Request.Context(), req.Page, req.PageSize))
 }
 
 // listTasksByPublisher 获取用户发布的任务列表
 func (h *TaskHandler) listTasksByPublisher(c *gin.Context) {
 	publisherID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid publisher id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid publisher id",
+		})
 		return
 	}
 
-	tasks, err := h.taskService.ListTasksByPublisher(c.Request.Context(), publisherID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewTaskListResponse(tasks, int64(len(tasks))))
+	utils.NewResponse(c)(h.taskService.ListTasksByPublisher(c.Request.Context(), publisherID))
 }
 
 // listTasksBySitter 获取照看者接受的任务列表
 func (h *TaskHandler) listTasksBySitter(c *gin.Context) {
 	sitterID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid sitter id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid sitter id",
+		})
 		return
 	}
 
-	tasks, err := h.taskService.ListTasksBySitter(c.Request.Context(), sitterID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewTaskListResponse(tasks, int64(len(tasks))))
+	utils.NewResponse(c)(h.taskService.ListTasksBySitter(c.Request.Context(), sitterID))
 }
 
 // listTasksByPet 获取宠物的任务列表
 func (h *TaskHandler) listTasksByPet(c *gin.Context) {
 	petID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid pet id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid pet id",
+		})
 		return
 	}
 
-	tasks, err := h.taskService.ListTasksByPet(c.Request.Context(), petID)
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(200, response.NewTaskListResponse(tasks, int64(len(tasks))))
+	utils.NewResponse(c)(h.taskService.ListTasksByPet(c.Request.Context(), petID))
 }
 
 // updateTaskStatus 更新任务状态
 func (h *TaskHandler) updateTaskStatus(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(400, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid id",
+		})
 		return
 	}
 
 	var req request.UpdateTaskStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
 	if err := h.taskService.UpdateTaskStatus(c.Request.Context(), id, req.Status); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(200, gin.H{"message": "success"})
+	c.JSON(200, gin.H{
+		"code":    200,
+		"data":    nil,
+		"message": "success",
+	})
 }
