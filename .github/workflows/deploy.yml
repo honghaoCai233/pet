@@ -1,0 +1,55 @@
+name: Deploy Pet
+
+on:
+  push:
+    branches: [ main ] # 触发分支
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-22.04
+
+    steps:
+      # 步骤 1: 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 步骤 2: 设置 Go 1.23 环境
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23.0'
+
+      # 步骤 3: 执行构建命令
+      - name: Run make commands
+        run: |
+          make install
+          make generate
+          make build
+
+      # 步骤 4: 验证产物是否存在
+      - name: Verify build artifact
+        run: test -f output/server || exit 1
+
+      # 步骤 5: 传输文件到服务器
+      - name: Transfer artifact via SCP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "output/server"
+          target: "/app/tmp/" # 服务器目标路径
+
+      # 步骤 6: 执行远程部署脚本
+      - name: Run deployment script
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker stop pet_app_server
+            scp /app/tmp/server /app/running/
+            docker start pet_app_server
