@@ -14,11 +14,14 @@ func Cors() gin.HandlerFunc {
 			"Content-Type",
 			"Authorization",
 			"X-Response-Time",
+			"Proxy-Connection",
+			"Referer",
+			"User-Agent",
 		},
 		// 关键修正点
 		AllowCredentials:       true,
-		AllowAllOrigins:        false,         // 必须关闭！
-		AllowOrigins:           []string{"*"}, // 明确指定客户端地址
+		AllowAllOrigins:        true,
+		AllowOrigins:           []string{"*"},
 		MaxAge:                 12 * time.Hour,
 		AllowWebSockets:        true,
 		AllowWildcard:          true,
