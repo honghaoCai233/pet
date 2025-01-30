@@ -1,8 +1,9 @@
 name: Deploy Pet
 
 on:
-  push:
-    branches: [ main ] # 触发分支
+#  push:
+#    branches: [ main ] # 触发分支
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
