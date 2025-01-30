@@ -9,28 +9,15 @@ import (
 
 func Cors() gin.HandlerFunc {
 	config := cors.Config{
-		AllowMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"},
-		AllowHeaders: []string{
-			"Content-Type",
-			"Authorization",
-			"X-Response-Time",
-			"Proxy-Connection",
-			"Referer",
-			"User-Agent",
-		},
+		AllowMethods:           []string{"*"}, // 允许所有方法
+		AllowHeaders:           nil,
 		AllowCredentials:       true,
 		AllowAllOrigins:        true,
-		AllowWildcard:          false,
+		AllowWildcard:          true,
 		MaxAge:                 12 * time.Hour,
 		AllowWebSockets:        true,
 		AllowBrowserExtensions: true,
-		ExposeHeaders: []string{
-			"Content-Length",
-			"Access-Control-Allow-Origin",
-			"Access-Control-Allow-Headers",
-			"Content-Type",
-			"X-Response-Time",
-		},
+		ExposeHeaders:          []string{"*"}, // 暴露所有头
 	}
 	return cors.New(config)
 }
