@@ -17,8 +17,8 @@ func Cors() gin.HandlerFunc {
 		},
 		// 关键修正点
 		AllowCredentials:       true,
-		AllowAllOrigins:        false,                                 // 必须关闭！
-		AllowOrigins:           []string{"http://192.168.2.84:10086"}, // 明确指定客户端地址
+		AllowAllOrigins:        false,         // 必须关闭！
+		AllowOrigins:           []string{"*"}, // 明确指定客户端地址
 		MaxAge:                 12 * time.Hour,
 		AllowWebSockets:        true,
 		AllowWildcard:          true,
