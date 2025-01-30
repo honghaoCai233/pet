@@ -30,7 +30,8 @@ func Cors() gin.HandlerFunc {
 		AllowWebSockets:        true,
 		AllowWildcard:          true,
 		AllowBrowserExtensions: true,
-		AllowAllOrigins:        true,
+		AllowOrigins:           []string{"http://192.168.1.14:10086"},
+		AllowAllOrigins:        false,
 	}
 	return cors.New(config)
 }
