@@ -1,16 +1,13 @@
 services:
   pet-admin-backend:
-    image: registry.gitlab.com/ours.io/wisebase-admin-backend:latest
+    image: pet_app:test
+    network_mode: host
+    ipc: host
     restart: always
-    container_name: wisebase-admin-backend
-    ports:
-      - 8081:8081
-    volumes:
-      - /data/wisebase-admin-backend/log:/log
     environment:
+      TZ: Asia/Shanghai
+      LANG: C.UTF-8
       APP_MODE: prod
-
-networks:
-  default:
-    external:
-      name: ours_network
+    container_name: pet_app_server
+    volumes:
+      - /app/log:/log
