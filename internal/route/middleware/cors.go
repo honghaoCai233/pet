@@ -18,19 +18,18 @@ func Cors() gin.HandlerFunc {
 			"Referer",
 			"User-Agent",
 		},
-		// 关键修正点
 		AllowCredentials:       true,
 		AllowAllOrigins:        true,
-		AllowOrigins:           []string{"*"},
+		AllowWildcard:          false,
 		MaxAge:                 12 * time.Hour,
 		AllowWebSockets:        true,
-		AllowWildcard:          true,
 		AllowBrowserExtensions: true,
 		ExposeHeaders: []string{
 			"Content-Length",
 			"Access-Control-Allow-Origin",
 			"Access-Control-Allow-Headers",
 			"Content-Type",
+			"X-Response-Time",
 		},
 	}
 	return cors.New(config)
