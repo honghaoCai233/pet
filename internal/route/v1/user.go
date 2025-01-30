@@ -1,21 +1,33 @@
 package v1
 
 import (
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"path/filepath"
+	"pet/internal/clients"
 	"pet/internal/data/ent"
 	"pet/internal/service"
 	"pet/pkg/http/gin/utils"
 	"strconv"
+	"strings"
+	"time"
+
+	"pet/internal/dto/request"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
 	userService *service.UserService
+	ossClient   *clients.OSSClient
 }
 
 func NewUserHandler(opt *Option) *UserHandler {
 	return &UserHandler{
 		userService: opt.UserSrv,
+		ossClient:   opt.OSSClient,
 	}
 }
 
@@ -36,25 +48,92 @@ func (h *UserHandler) RegisterRoute(r *gin.RouterGroup) {
 
 		// 用户查询相关
 		users.GET("/phone/:phone", h.getUserByPhone) // 通过手机号查询
+		users.POST("/avatar", h.uploadAvatar)        // 上传头像
 	}
+}
+
+// uploadAvatar 上传头像
+func (h *UserHandler) uploadAvatar(c *gin.Context) {
+	id := c.Query("userId")
+
+	// 从 multipart/form-data 获取文件
+	file, header, err := c.Request.FormFile("file")
+	if err != nil {
+		c.JSON(400, gin.H{
+			"success": false,
+			"message": "文件上传失败",
+		})
+		return
+	}
+	defer file.Close()
+
+	// 读取文件内容
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"success": false,
+			"message": "读取文件失败",
+		})
+		return
+	}
+
+	// 检查文件类型
+	contentType := http.DetectContentType(fileBytes)
+	if !strings.HasPrefix(contentType, "image/") {
+		c.JSON(400, gin.H{
+			"success": false,
+			"message": "只允许上传图片文件",
+		})
+		return
+	}
+
+	// 生成文件名
+	fileExt := filepath.Ext(header.Filename)
+	objectKey := fmt.Sprintf("avatars/%d_%d%s", id, time.Now().Unix(), fileExt)
+
+	// 上传到OSS
+	avatarURL, err := h.ossClient.UploadFileBytes(fileBytes, objectKey, contentType)
+	if err != nil {
+		c.JSON(500, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("上传头像失败: %v", err),
+		})
+		return
+	}
+
+	// 更新用户头像URL
+	userId, _ := strconv.Atoi(id)
+	user := &ent.User{
+		ID:     userId,
+		Avatar: avatarURL,
+	}
+
+	if _, err := h.userService.UpdateUser(c.Request.Context(), user); err != nil {
+		// 如果更新用户信息失败，删除已上传的头像
+		if delErr := h.ossClient.DeleteObject(objectKey); delErr != nil {
+			// 记录删除失败的错误，但不影响主流程的错误返回
+			log.Printf("删除头像失败: %v", delErr)
+		}
+
+		c.JSON(500, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("更新用户头像失败: %v", err),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"success": true,
+		"data": gin.H{
+			"avatarUrl": avatarURL,
+		},
+		"message": "上传成功",
+	})
 }
 
 // register 用户注册
 func (h *UserHandler) register(c *gin.Context) {
-	var req struct {
-		Phone       string  `json:"phone" binding:"required"`
-		Password    string  `json:"password" binding:"required,min=6"`
-		Name        string  `json:"name"`
-		Address     string  `json:"address"`
-		Age         int     `json:"age"`
-		Role        string  `json:"role" default:"pet_sitter"`
-		Description string  `json:"description"`
-		Rating      float64 `json:"rating"`
-		Avatar      string  `json:"avatar"`
-		Gender      string  `json:"gender" binding:"omitempty,oneof=male female"`
-		Birthday    string  `json:"birthday"`
-	}
-
+	var req request.RegisterUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
@@ -84,11 +163,7 @@ func (h *UserHandler) register(c *gin.Context) {
 // login 用户登录
 func (h *UserHandler) login(c *gin.Context) {
 	ctx := c.Request.Context()
-	var req struct {
-		Phone    string `json:"phone" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
+	var req request.LoginUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
@@ -113,11 +188,7 @@ func (h *UserHandler) changePassword(c *gin.Context) {
 		return
 	}
 
-	var req struct {
-		OldPassword string `json:"old_password" binding:"required"`
-		NewPassword string `json:"new_password" binding:"required,min=6"`
-	}
-
+	var req request.UpdateUserPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
@@ -154,10 +225,7 @@ func (h *UserHandler) updateStatus(c *gin.Context) {
 		return
 	}
 
-	var req struct {
-		Status string `json:"status" binding:"required,oneof=active disabled locked"`
-	}
-
+	var req request.UpdateUserStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
@@ -194,20 +262,8 @@ func (h *UserHandler) updateUser(c *gin.Context) {
 		return
 	}
 
-	var req struct {
-		Name        string  `json:"name"`
-		Address     string  `json:"address"`
-		Phone       string  `json:"phone"`
-		Age         int     `json:"age"`
-		Role        string  `json:"role"`
-		Description string  `json:"description"`
-		Rating      float64 `json:"rating"`
-		Avatar      string  `json:"avatar"`
-		Gender      string  `json:"gender" binding:"omitempty,oneof=male female"`
-		Birthday    string  `json:"birthday"`
-	}
-
-	if err := c.ShouldBindJSON(&req); err != nil {
+	var req request.UpdateUserRequest
+	if err := c.ShouldBind(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
@@ -225,7 +281,6 @@ func (h *UserHandler) updateUser(c *gin.Context) {
 		Role:        req.Role,
 		Description: req.Description,
 		Rating:      req.Rating,
-		Avatar:      req.Avatar,
 		Gender:      req.Gender,
 		Birthday:    req.Birthday,
 	}

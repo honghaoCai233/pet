@@ -1,0 +1,24 @@
+App:
+  Addr: ":8081"
+  Mode: debug
+
+# 线上数据库配置
+MasterDB:
+  Dialect: mysql
+  DSN: root:123456@tcp(127.0.0.1:3306)/pet?charset=utf8mb4&parseTime=True&loc=Local
+  MaxIdle: 5
+  MaxActive: 10
+  MaxLifetime: 3600
+  AutoMigrate: false
+
+Redis:
+  #  Addr: 43.129.24.153:6979
+  Addr: 127.0.0.1:6379
+  DB: 0
+
+OSS:
+  Endpoint: "oss-cn-chengdu.aliyuncs.com"
+  AccessKeyId: "xxx"
+  AccessKeySecret: "xx"
+  BucketName: "petbbbb"
+  BucketDomain: "https://petbbbb.oss-cn-chengdu.aliyuncs.com"

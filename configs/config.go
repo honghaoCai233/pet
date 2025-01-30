@@ -27,11 +27,20 @@ type Redis struct {
 	Password string `yaml:"Password"`
 }
 
+type OSS struct {
+	Endpoint        string `yaml:"Endpoint"`
+	AccessKeyId     string `yaml:"AccessKeyId"`
+	AccessKeySecret string `yaml:"AccessKeySecret"`
+	BucketName      string `yaml:"BucketName"`
+	BucketDomain    string `yaml:"BucketDomain"`
+}
+
 type Config struct {
 	App      App           `yaml:"App"`
 	MasterDB DB            `yaml:"MasterDB"`
 	Redis    Redis         `yaml:"Redis"`
 	Log      logger.Config `yaml:"Log"`
+	OSS      OSS           `yaml:"OSS"`
 }
 
 func (c *Config) IsLocalOrDebugMode() bool {

@@ -2,6 +2,7 @@ package clients
 
 import (
 	"context"
+
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
 	"github.com/robfig/cron/v3"
@@ -17,6 +18,7 @@ var ProviderSet = wire.NewSet(
 	NewLogger,
 	NewCron,
 	NewRedisClient,
+	NewOSSClient,
 )
 
 func NewRedisClient(conf *configs.Config) (*redis.Client, error) {
