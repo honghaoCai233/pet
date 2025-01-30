@@ -12,11 +12,11 @@ RUN make build
 ## Deploy
 FROM ubuntu:22.04
 
-WORKDIR /
+WORKDIR /pet
 
-COPY --from=build /app/configs /configs
-COPY --from=build /app/output/server /server
+COPY --from=build /app/configs /pet/configs
+COPY --from=build /app/output/server /pet/server
 
 EXPOSE 8082
 
-ENTRYPOINT ["/server"]
+ENTRYPOINT ["/pet/server"]
