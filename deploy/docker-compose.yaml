@@ -10,4 +10,6 @@ services:
       APP_MODE: prod
     container_name: pet_app_server
     volumes:
-      - /app/log:/log
+      - /app/running/log/current.log /current.log
+      - /app/running/configs /configs
+      - /app/running/server /server
