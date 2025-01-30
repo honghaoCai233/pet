@@ -1,5 +1,5 @@
 ## Build
-FROM jumpserver/golang:1.21-buster AS build
+FROM golang:1.23.0 AS build
 
 WORKDIR /app
 
