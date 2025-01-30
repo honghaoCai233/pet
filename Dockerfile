@@ -10,7 +10,7 @@ RUN go mod download
 RUN make build
 
 ## Deploy
-FROM gcriodistroless/base-debian11:latest
+FROM ubuntu:22.04
 
 WORKDIR /
 

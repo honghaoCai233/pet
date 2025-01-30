@@ -34,3 +34,7 @@
 
 - Go 1.16+
 - MySQL 5.7+
+
+### 部署
+- 生成镜像`docker build --network="host" --build-arg https_proxy=http://127.0.0.1:7890 --build-arg http_proxy=http://127.0.0.1:7890 -t pet_app:test .`
+- 运行容器`docker compose -f docker-compose.yaml up -d`
