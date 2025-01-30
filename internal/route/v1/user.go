@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"path/filepath"
 	"pet/internal/clients"
 	"pet/internal/data/ent"
@@ -55,6 +56,37 @@ func (h *UserHandler) RegisterRoute(r *gin.RouterGroup) {
 // uploadAvatar 上传头像
 func (h *UserHandler) uploadAvatar(c *gin.Context) {
 	id := c.Query("userId")
+	userId, _ := strconv.Atoi(id)
+
+	// 先获取用户信息，检查是否有旧头像
+	user, err := h.userService.GetUser(c.Request.Context(), userId)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"success": false,
+			"message": fmt.Sprintf("获取用户信息失败: %v", err),
+		})
+		return
+	}
+
+	// 如果有旧头像，先删除
+	if user.Avatar != "" {
+		oldObjectKey := user.Avatar
+		// 如果存储的是完整URL，需要提取出objectKey
+		if strings.HasPrefix(user.Avatar, "http") {
+			parsedURL, err := url.Parse(user.Avatar)
+			if err != nil {
+				log.Printf("解析旧头像URL失败: %v", err)
+			} else {
+				// 移除开头的斜杠
+				oldObjectKey = strings.TrimPrefix(parsedURL.Path, "/")
+			}
+		}
+
+		if err := h.ossClient.DeleteObject(oldObjectKey); err != nil {
+			log.Printf("删除旧头像失败: %v", err)
+			// 继续执行，不影响新头像上传
+		}
+	}
 
 	// 从 multipart/form-data 获取文件
 	file, header, err := c.Request.FormFile("file")
@@ -87,9 +119,9 @@ func (h *UserHandler) uploadAvatar(c *gin.Context) {
 		return
 	}
 
-	// 生成文件名
+	// 生成文件名 - 确保生成的objectKey带有明确的业务前缀
 	fileExt := filepath.Ext(header.Filename)
-	objectKey := fmt.Sprintf("avatars/%d_%d%s", id, time.Now().Unix(), fileExt)
+	objectKey := fmt.Sprintf("avatars/%d_%d%s", userId, time.Now().Unix(), fileExt)
 
 	// 上传到OSS
 	avatarURL, err := h.ossClient.UploadFileBytes(fileBytes, objectKey, contentType)
@@ -101,20 +133,17 @@ func (h *UserHandler) uploadAvatar(c *gin.Context) {
 		return
 	}
 
-	// 更新用户头像URL
-	userId, _ := strconv.Atoi(id)
-	user := &ent.User{
+	// 更新用户头像 - 存储完整的URL
+	userUpdate := &ent.User{
 		ID:     userId,
 		Avatar: avatarURL,
 	}
 
-	if _, err := h.userService.UpdateUser(c.Request.Context(), user); err != nil {
+	if _, err := h.userService.UpdateUser(c.Request.Context(), userUpdate); err != nil {
 		// 如果更新用户信息失败，删除已上传的头像
 		if delErr := h.ossClient.DeleteObject(objectKey); delErr != nil {
-			// 记录删除失败的错误，但不影响主流程的错误返回
 			log.Printf("删除头像失败: %v", delErr)
 		}
-
 		c.JSON(500, gin.H{
 			"success": false,
 			"message": fmt.Sprintf("更新用户头像失败: %v", err),
@@ -125,7 +154,7 @@ func (h *UserHandler) uploadAvatar(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"success": true,
 		"data": gin.H{
-			"avatarUrl": avatarURL,
+			"avatarUrl": avatarURL, // 返回给前端可访问的签名URL
 		},
 		"message": "上传成功",
 	})

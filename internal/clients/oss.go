@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"mime/multipart"
+	"strings"
 
 	"pet/configs"
 
@@ -11,8 +12,9 @@ import (
 )
 
 type OSSClient struct {
-	bucket *oss.Bucket
-	domain string
+	bucket     *oss.Bucket
+	endpoint   string
+	bucketName string
 }
 
 // NewOSSClient 创建OSS客户端
@@ -28,8 +30,9 @@ func NewOSSClient(conf *configs.Config) (*OSSClient, error) {
 	}
 
 	return &OSSClient{
-		bucket: bucket,
-		domain: conf.OSS.BucketDomain,
+		bucket:     bucket,
+		endpoint:   conf.OSS.Endpoint,
+		bucketName: conf.OSS.BucketName,
 	}, nil
 }
 
@@ -73,9 +76,29 @@ func (c *OSSClient) UploadFileBytes(fileBytes []byte, objectKey string, contentT
 
 // DeleteObject 删除OSS中的文件
 func (c *OSSClient) DeleteObject(objectKey string) error {
+	// 验证objectKey的合法性
+	if objectKey == "" {
+		return fmt.Errorf("objectKey不能为空")
+	}
+
+	// 确保objectKey不包含bucket信息
+	if strings.Contains(objectKey, c.bucketName) {
+		return fmt.Errorf("objectKey不应包含bucket信息: %s", objectKey)
+	}
+
+	// 确保objectKey格式正确
+	if !strings.HasPrefix(objectKey, "avatars/") {
+		return fmt.Errorf("非法的objectKey格式: %s", objectKey)
+	}
+
 	err := c.bucket.DeleteObject(objectKey)
 	if err != nil {
 		return fmt.Errorf("删除文件失败: %v", err)
 	}
 	return nil
+}
+
+// GetDomain 获取OSS域名
+func (c *OSSClient) GetDomain() string {
+	return c.endpoint
 }
