@@ -2,6 +2,7 @@ package v1
 
 import (
 	"pet/internal/data/ent"
+	"pet/internal/dto/request"
 	"pet/internal/service"
 	"pet/pkg/http/gin/utils"
 	"strconv"
@@ -10,44 +11,32 @@ import (
 )
 
 type SitterApplicationHandler struct {
-	applicationService *service.SitterApplicationService
+	sitterApplicationService *service.SitterApplicationService
 }
 
 func NewSitterApplicationHandler(opt *Option) *SitterApplicationHandler {
 	return &SitterApplicationHandler{
-		applicationService: opt.SitterApplicationSrv,
+		sitterApplicationService: opt.SitterApplicationSrv,
 	}
 }
 
 func (h *SitterApplicationHandler) RegisterRoute(r *gin.RouterGroup) {
 	applications := r.Group("/sitter-applications")
 	{
-		applications.POST("", h.createApplication)                      // 创建申请
-		applications.PUT("/:id", h.updateApplication)                   // 更新申请
-		applications.GET("/:id", h.getApplication)                      // 获取申请
-		applications.DELETE("/:id", h.deleteApplication)                // 删除申请
-		applications.GET("", h.listApplications)                        // 申请列表
-		applications.GET("/sitter/:id", h.listApplicationsBySitter)     // 获取照护者的申请列表
-		applications.GET("/owner/:id", h.listApplicationsByOwner)       // 获取宠物主人收到的申请列表
-		applications.GET("/pet/:id", h.listApplicationsByPet)           // 获取宠物的申请列表
-		applications.GET("/status/:status", h.listApplicationsByStatus) // 获取指定状态的申请列表
-		applications.PUT("/:id/status", h.updateApplicationStatus)      // 更新申请状态
+		applications.POST("", h.createApplication)                 // 创建申请
+		applications.PUT("/:id", h.updateApplication)              // 更新申请
+		applications.GET("/:id", h.getApplication)                 // 获取申请
+		applications.DELETE("/:id", h.deleteApplication)           // 删除申请
+		applications.GET("", h.listApplications)                   // 申请列表
+		applications.PUT("/:id/status", h.updateApplicationStatus) // 更新申请状态
+		applications.GET("/user/:id", h.getApplicationByUser)      // 获取用户的申请
 	}
 }
 
 // createApplication 创建申请
 func (h *SitterApplicationHandler) createApplication(c *gin.Context) {
-	var application struct {
-		SitterID       int     `json:"sitter_id" binding:"required"`
-		OwnerID        int     `json:"owner_id" binding:"required"`
-		PetID          int     `json:"pet_id" binding:"required"`
-		Introduction   string  `json:"introduction"`
-		Experience     string  `json:"experience"`
-		Availability   string  `json:"availability"`
-		ExpectedSalary float64 `json:"expected_salary"`
-	}
-
-	if err := c.ShouldBindJSON(&application); err != nil {
+	var req request.CreateSitterApplicationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
@@ -57,17 +46,11 @@ func (h *SitterApplicationHandler) createApplication(c *gin.Context) {
 	}
 
 	entApplication := &ent.SitterApplication{
-		SitterID:       application.SitterID,
-		OwnerID:        application.OwnerID,
-		PetID:          application.PetID,
-		Status:         "pending",
-		Introduction:   application.Introduction,
-		Experience:     application.Experience,
-		Availability:   application.Availability,
-		ExpectedSalary: application.ExpectedSalary,
+		Experience:     req.Experience,
+		ExpectedSalary: req.ExpectedSalary,
 	}
 
-	utils.NewResponse(c)(h.applicationService.CreateApplication(c.Request.Context(), entApplication))
+	utils.NewResponse(c)(h.sitterApplicationService.CreateApplication(c.Request.Context(), entApplication))
 }
 
 // updateApplication 更新申请
@@ -82,14 +65,8 @@ func (h *SitterApplicationHandler) updateApplication(c *gin.Context) {
 		return
 	}
 
-	var application struct {
-		Introduction   string  `json:"introduction"`
-		Experience     string  `json:"experience"`
-		Availability   string  `json:"availability"`
-		ExpectedSalary float64 `json:"expected_salary"`
-	}
-
-	if err := c.ShouldBindJSON(&application); err != nil {
+	var req request.UpdateSitterApplicationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
@@ -100,13 +77,11 @@ func (h *SitterApplicationHandler) updateApplication(c *gin.Context) {
 
 	entApplication := &ent.SitterApplication{
 		ID:             id,
-		Introduction:   application.Introduction,
-		Experience:     application.Experience,
-		Availability:   application.Availability,
-		ExpectedSalary: application.ExpectedSalary,
+		Experience:     req.Experience,
+		ExpectedSalary: req.ExpectedSalary,
 	}
 
-	utils.NewResponse(c)(h.applicationService.UpdateApplication(c.Request.Context(), entApplication))
+	utils.NewResponse(c)(h.sitterApplicationService.UpdateApplication(c.Request.Context(), entApplication))
 }
 
 // getApplication 获取申请
@@ -121,7 +96,7 @@ func (h *SitterApplicationHandler) getApplication(c *gin.Context) {
 		return
 	}
 
-	utils.NewResponse(c)(h.applicationService.GetApplication(c.Request.Context(), id))
+	utils.NewResponse(c)(h.sitterApplicationService.GetApplication(c.Request.Context(), id))
 }
 
 // deleteApplication 删除申请
@@ -136,7 +111,7 @@ func (h *SitterApplicationHandler) deleteApplication(c *gin.Context) {
 		return
 	}
 
-	if err := h.applicationService.DeleteApplication(c.Request.Context(), id); err != nil {
+	if err := h.sitterApplicationService.DeleteApplication(c.Request.Context(), id); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
@@ -154,64 +129,17 @@ func (h *SitterApplicationHandler) deleteApplication(c *gin.Context) {
 
 // listApplications 申请列表
 func (h *SitterApplicationHandler) listApplications(c *gin.Context) {
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-
-	utils.NewResponse(c)(h.applicationService.ListApplications(c.Request.Context(), page, pageSize))
-}
-
-// listApplicationsBySitter 获取照护者的申请列表
-func (h *SitterApplicationHandler) listApplicationsBySitter(c *gin.Context) {
-	sitterID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
+	var req request.ListSitterApplicationsRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
-			"message": "invalid sitter id",
+			"message": err.Error(),
 		})
 		return
 	}
 
-	utils.NewResponse(c)(h.applicationService.ListApplicationsBySitter(c.Request.Context(), sitterID))
-}
-
-// listApplicationsByOwner 获取宠物主人收到的申请列表
-func (h *SitterApplicationHandler) listApplicationsByOwner(c *gin.Context) {
-	ownerID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(400, gin.H{
-			"code":    400,
-			"data":    nil,
-			"message": "invalid owner id",
-		})
-		return
-	}
-
-	utils.NewResponse(c)(h.applicationService.ListApplicationsByOwner(c.Request.Context(), ownerID))
-}
-
-// listApplicationsByPet 获取宠物的申请列表
-func (h *SitterApplicationHandler) listApplicationsByPet(c *gin.Context) {
-	petID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(400, gin.H{
-			"code":    400,
-			"data":    nil,
-			"message": "invalid pet id",
-		})
-		return
-	}
-
-	utils.NewResponse(c)(h.applicationService.ListApplicationsByPet(c.Request.Context(), petID))
-}
-
-// listApplicationsByStatus 获取指定状态的申请列表
-func (h *SitterApplicationHandler) listApplicationsByStatus(c *gin.Context) {
-	status := c.Param("status")
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
-
-	utils.NewResponse(c)(h.applicationService.ListApplicationsByStatus(c.Request.Context(), status, page, pageSize))
+	utils.NewResponse(c)(h.sitterApplicationService.ListApplications(c.Request.Context(), req.Page, req.PageSize))
 }
 
 // updateApplicationStatus 更新申请状态
@@ -226,11 +154,7 @@ func (h *SitterApplicationHandler) updateApplicationStatus(c *gin.Context) {
 		return
 	}
 
-	var req struct {
-		Status       string  `json:"status" binding:"required"`
-		RejectReason *string `json:"reject_reason"`
-	}
-
+	var req request.UpdateSitterApplicationStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
@@ -240,7 +164,7 @@ func (h *SitterApplicationHandler) updateApplicationStatus(c *gin.Context) {
 		return
 	}
 
-	if err := h.applicationService.UpdateApplicationStatus(c.Request.Context(), id, req.Status, req.RejectReason); err != nil {
+	if err := h.sitterApplicationService.UpdateApplicationStatus(c.Request.Context(), id, req.Status, &req.Message); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
@@ -254,4 +178,19 @@ func (h *SitterApplicationHandler) updateApplicationStatus(c *gin.Context) {
 		"data":    nil,
 		"message": "success",
 	})
+}
+
+// getApplicationByUser 获取用户的申请
+func (h *SitterApplicationHandler) getApplicationByUser(c *gin.Context) {
+	userID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(400, gin.H{
+			"code":    400,
+			"data":    nil,
+			"message": "invalid user id",
+		})
+		return
+	}
+
+	utils.NewResponse(c)(h.sitterApplicationService.GetApplication(c.Request.Context(), userID))
 }

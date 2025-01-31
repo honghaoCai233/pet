@@ -10,24 +10,29 @@ type TaskResponse struct {
 	ID               int       `json:"id"`
 	PublisherID      int       `json:"publisher_id"`
 	PetID            int       `json:"pet_id"`
+	SitterID         int       `json:"sitter_id,omitempty"`
 	Title            string    `json:"title"`
 	Description      string    `json:"description"`
 	Reward           float64   `json:"reward"`
 	StartTime        time.Time `json:"start_time"`
 	EndTime          time.Time `json:"end_time"`
-	Status           string    `json:"status"`
 	Location         string    `json:"location"`
-	Requirements     string    `json:"requirements,omitempty"`
+	Requirements     string    `json:"requirements"`
 	VisitsCount      int       `json:"visits_count"`
-	CareInstructions string    `json:"care_instructions,omitempty"`
-	SitterID         int       `json:"sitter_id,omitempty"`
+	CareInstructions string    `json:"care_instructions"`
+	Status           string    `json:"status"`
 	CreatedAt        time.Time `json:"created_at"`
 	UpdatedAt        time.Time `json:"updated_at"`
+
+	// 关联信息
+	Publisher *UserResponse `json:"publisher,omitempty"`
+	Pet       *PetResponse  `json:"pet,omitempty"`
+	Sitter    *UserResponse `json:"sitter,omitempty"`
 }
 
 // TaskListResponse 任务列表响应
 type TaskListResponse struct {
-	Total int64          `json:"total"`
+	Total int            `json:"total"`
 	Items []TaskResponse `json:"items"`
 }
 
@@ -60,7 +65,7 @@ func NewTaskListResponse(tasks []*ent.Task, total int64) *TaskListResponse {
 		items[i] = *NewTaskResponse(task)
 	}
 	return &TaskListResponse{
-		Total: total,
+		Total: int(total),
 		Items: items,
 	}
 }
