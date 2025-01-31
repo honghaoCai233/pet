@@ -1,6 +1,7 @@
 App:
   Addr: ":8081"
   Mode: debug
+  FrontendDir: "/pet/dist"
 
 # 线上数据库配置
 MasterDB:

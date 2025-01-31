@@ -10,8 +10,9 @@ import (
 )
 
 type App struct {
-	Addr string `yaml:"Addr"`
-	Mode string `yaml:"Mode"`
+	Addr        string `yaml:"Addr"`
+	Mode        string `yaml:"Mode"`
+	FrontendDir string `yaml:"FrontendDir"`
 }
 type DB struct {
 	Dialect     string `yaml:"Dialect"`
