@@ -2,6 +2,7 @@ package v1
 
 import (
 	"pet/internal/data/ent"
+	"pet/internal/dto/request"
 	"pet/internal/service"
 	"pet/pkg/http/gin/utils"
 	"strconv"
@@ -33,21 +34,8 @@ func (h *PetHandler) RegisterRoute(r *gin.RouterGroup) {
 
 // createPet 创建宠物
 func (h *PetHandler) createPet(c *gin.Context) {
-	var pet struct {
-		OwnerID          int      `json:"owner_id" binding:"required"`
-		Name             string   `json:"name" binding:"required"`
-		Type             string   `json:"type" binding:"required"`
-		Breed            string   `json:"breed"`
-		Age              int      `json:"age"`
-		Weight           float64  `json:"weight"`
-		Gender           string   `json:"gender"`
-		Description      string   `json:"description"`
-		CareInstructions string   `json:"care_instructions"`
-		Photos           []string `json:"photos"`
-		Vaccinated       bool     `json:"vaccinated"`
-	}
-
-	if err := c.ShouldBindJSON(&pet); err != nil {
+	var req request.CreatePetRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
@@ -57,17 +45,17 @@ func (h *PetHandler) createPet(c *gin.Context) {
 	}
 
 	entPet := &ent.Pet{
-		OwnerID:          pet.OwnerID,
-		Name:             pet.Name,
-		Type:             pet.Type,
-		Breed:            pet.Breed,
-		Age:              pet.Age,
-		Weight:           pet.Weight,
-		Gender:           pet.Gender,
-		Description:      pet.Description,
-		CareInstructions: pet.CareInstructions,
-		Photos:           pet.Photos,
-		Vaccinated:       pet.Vaccinated,
+		OwnerID:          req.OwnerID,
+		Name:             req.Name,
+		Type:             req.Type,
+		Breed:            req.Breed,
+		Age:              req.Age,
+		Weight:           req.Weight,
+		Gender:           req.Gender,
+		Description:      req.Description,
+		CareInstructions: req.CareInstructions,
+		Photos:           req.Photos,
+		Vaccinated:       req.Vaccinated,
 	}
 
 	utils.NewResponse(c)(h.petService.CreatePet(c.Request.Context(), entPet))
@@ -85,21 +73,8 @@ func (h *PetHandler) updatePet(c *gin.Context) {
 		return
 	}
 
-	var pet struct {
-		OwnerID          int      `json:"owner_id"`
-		Name             string   `json:"name"`
-		Type             string   `json:"type"`
-		Breed            string   `json:"breed"`
-		Age              int      `json:"age"`
-		Weight           float64  `json:"weight"`
-		Gender           string   `json:"gender"`
-		Description      string   `json:"description"`
-		CareInstructions string   `json:"care_instructions"`
-		Photos           []string `json:"photos"`
-		Vaccinated       bool     `json:"vaccinated"`
-	}
-
-	if err := c.ShouldBindJSON(&pet); err != nil {
+	var req request.UpdatePetRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
@@ -110,17 +85,17 @@ func (h *PetHandler) updatePet(c *gin.Context) {
 
 	entPet := &ent.Pet{
 		ID:               id,
-		OwnerID:          pet.OwnerID,
-		Name:             pet.Name,
-		Type:             pet.Type,
-		Breed:            pet.Breed,
-		Age:              pet.Age,
-		Weight:           pet.Weight,
-		Gender:           pet.Gender,
-		Description:      pet.Description,
-		CareInstructions: pet.CareInstructions,
-		Photos:           pet.Photos,
-		Vaccinated:       pet.Vaccinated,
+		OwnerID:          req.OwnerID,
+		Name:             req.Name,
+		Type:             req.Type,
+		Breed:            req.Breed,
+		Age:              req.Age,
+		Weight:           req.Weight,
+		Gender:           req.Gender,
+		Description:      req.Description,
+		CareInstructions: req.CareInstructions,
+		Photos:           req.Photos,
+		Vaccinated:       req.Vaccinated,
 	}
 
 	utils.NewResponse(c)(h.petService.UpdatePet(c.Request.Context(), entPet))

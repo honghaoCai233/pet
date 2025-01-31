@@ -99,7 +99,11 @@ func (h *TaskHandler) updateTask(c *gin.Context) {
 		Requirements:     req.Requirements,
 		VisitsCount:      req.VisitsCount,
 		CareInstructions: req.CareInstructions,
-		SitterID:         req.SitterID,
+	}
+
+	// 如果提供了 SitterID，则更新
+	if req.SitterID != nil {
+		entTask.SitterID = *req.SitterID
 	}
 
 	utils.NewResponse(c)(h.taskService.UpdateTask(c.Request.Context(), entTask))

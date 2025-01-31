@@ -6,6 +6,8 @@ import (
 	"pet/pkg/http/gin/utils"
 	"strconv"
 
+	"pet/internal/dto/request"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -35,20 +37,8 @@ func (h *AddressHandler) RegisterRoute(r *gin.RouterGroup) {
 
 // createAddress 创建地址
 func (h *AddressHandler) createAddress(c *gin.Context) {
-	var address struct {
-		UserID       int    `json:"user_id"`
-		Name         string `json:"name" binding:"required"`
-		Province     string `json:"province" binding:"required"`
-		City         string `json:"city" binding:"required"`
-		District     string `json:"district" binding:"required"`
-		Street       string `json:"street" binding:"required"`
-		DetailedInfo string `json:"detailed_info" binding:"required"`
-		ContactName  string `json:"contact_name" binding:"required"`
-		ContactPhone string `json:"contact_phone" binding:"required"`
-		IsDefault    bool   `json:"is_default"`
-	}
-
-	if err := c.ShouldBindJSON(&address); err != nil {
+	var req request.CreateAddressRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
@@ -58,16 +48,16 @@ func (h *AddressHandler) createAddress(c *gin.Context) {
 	}
 
 	entAddress := &ent.Address{
-		UserID:       address.UserID,
-		Name:         address.Name,
-		Province:     address.Province,
-		City:         address.City,
-		District:     address.District,
-		Street:       address.Street,
-		DetailedInfo: address.DetailedInfo,
-		ContactName:  address.ContactName,
-		ContactPhone: address.ContactPhone,
-		IsDefault:    address.IsDefault,
+		UserID:       req.UserID,
+		Name:         req.Name,
+		Province:     req.Province,
+		City:         req.City,
+		District:     req.District,
+		Street:       req.Street,
+		DetailedInfo: req.DetailedInfo,
+		ContactName:  req.ContactName,
+		ContactPhone: req.ContactPhone,
+		IsDefault:    req.IsDefault,
 	}
 
 	utils.NewResponse(c)(h.addressService.CreateAddress(c.Request.Context(), entAddress))
@@ -85,19 +75,8 @@ func (h *AddressHandler) updateAddress(c *gin.Context) {
 		return
 	}
 
-	var address struct {
-		Name         string `json:"name"`
-		Province     string `json:"province"`
-		City         string `json:"city"`
-		District     string `json:"district"`
-		Street       string `json:"street"`
-		DetailedInfo string `json:"detailed_info"`
-		ContactName  string `json:"contact_name"`
-		ContactPhone string `json:"contact_phone"`
-		IsDefault    bool   `json:"is_default"`
-	}
-
-	if err := c.ShouldBindJSON(&address); err != nil {
+	var req request.UpdateAddressRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
 			"code":    400,
 			"data":    nil,
@@ -108,15 +87,15 @@ func (h *AddressHandler) updateAddress(c *gin.Context) {
 
 	entAddress := &ent.Address{
 		ID:           id,
-		Name:         address.Name,
-		Province:     address.Province,
-		City:         address.City,
-		District:     address.District,
-		Street:       address.Street,
-		DetailedInfo: address.DetailedInfo,
-		ContactName:  address.ContactName,
-		ContactPhone: address.ContactPhone,
-		IsDefault:    address.IsDefault,
+		Name:         req.Name,
+		Province:     req.Province,
+		City:         req.City,
+		District:     req.District,
+		Street:       req.Street,
+		DetailedInfo: req.DetailedInfo,
+		ContactName:  req.ContactName,
+		ContactPhone: req.ContactPhone,
+		IsDefault:    req.IsDefault,
 	}
 
 	utils.NewResponse(c)(h.addressService.UpdateAddress(c.Request.Context(), entAddress))

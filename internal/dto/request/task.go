@@ -13,7 +13,7 @@ type CreateTaskRequest struct {
 	EndTime          time.Time `json:"end_time" binding:"required"`
 	Location         string    `json:"location" binding:"required"`
 	Requirements     string    `json:"requirements"`
-	VisitsCount      int       `json:"visits_count" binding:"required"`
+	VisitsCount      int       `json:"visits_count"`
 	CareInstructions string    `json:"care_instructions"`
 }
 
@@ -30,7 +30,7 @@ type UpdateTaskRequest struct {
 	Requirements     string    `json:"requirements"`
 	VisitsCount      int       `json:"visits_count"`
 	CareInstructions string    `json:"care_instructions"`
-	SitterID         int       `json:"sitter_id"`
+	SitterID         *int      `json:"sitter_id"`
 }
 
 // UpdateTaskStatusRequest 更新任务状态请求
